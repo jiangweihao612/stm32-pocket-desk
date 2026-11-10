@@ -1,0 +1,42 @@
+# ---------- Keil MDK 编译产物 ----------
+OBJ/
+*.o
+*.d
+*.crf
+*.axf
+*.hex
+*.bin
+*.elf
+*.map
+*.lst
+*.dep
+*.htm
+*.lnp
+*.sct
+*.iex
+*.tra
+*.build_log.htm
+*.uvguix.*
+
+# ---------- Keil 个人配置 / 调试器配置 ----------
+*.uvopt
+*.uvoptx
+*.uvguix
+JLinkSettings.ini
+DebugConfig/
+*.dbgconf
+
+# ---------- 编辑器 / 备份残留 ----------
+*.bak
+*.bak*
+*.orig
+*~
+
+# ---------- 构建日志 ----------
+build.log
+build_dbg.log
+
+# ---------- 本地产出的临时文件 ----------
+.workbuddy/
+__pycache__/
+*.pyc
