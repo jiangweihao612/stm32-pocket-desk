@@ -60,15 +60,53 @@ ILI9341 上画点/画线/画块，靠 `while(1)` 里的事件循环和触摸扫�
 
 ## 界面预览
 
-| 锁屏 | 状态页 |
+### 桌面系统
+
+| 锁屏（6 位密码，默认 `123456`） | 第一页 · 状态 |
 |---|---|
 | ![](docs/screenshots/01-lock.png) | ![](docs/screenshots/02-status.png) |
 
-| 应用页 | 心率 | DAC 波形 |
-|---|---|---|
-| ![](docs/screenshots/03-apps.png) | ![](docs/screenshots/04-heart.png) | ![](docs/screenshots/05-dac.png) |
+状态页把四路传感器塞进一张卡片：顶部三个大字是温度 / 气压 / 海拔，下面 DHT11 的温湿度、
+MQ-2 的 ADC 原始值与估算浓度、气泡式等级条，底部还有 BMP180 的在线状态和海平面参考气压。
 
-> 以上为界面渲染预览图（`docs/screenshots`），配色与布局和 `menu.c` 里的宏一一对应。
+| 第二页 · 应用 | 第三页 · 工具 |
+|---|---|
+| ![](docs/screenshots/03-apps.png) | ![](docs/screenshots/04-tools.png) |
+
+三页桌面底部的小圆点表示当前页；左右滑动超过 60 px 翻页，也可以用 KEY1 / KEY2 翻。
+第三页目前只挂了 DAC 一个图标，以后加新 APP 就往这一页排。
+
+### 小游戏
+
+| DINO RUN 主页 | DINO RUN 进行中 |
+|---|---|
+| ![](docs/screenshots/05-dino-menu.png) | ![](docs/screenshots/06-dino-play.png) |
+
+| PLANE WAR（飞机大战） | SNAKE（贪吃蛇） |
+|---|---|
+| ![](docs/screenshots/07-plane.png) | ![](docs/screenshots/08-snake.png) |
+
+三个游戏主页结构一致（`START / SETTINGS / INFO / HOME`），最高分和难度存在 EEPROM 里，
+换电池也不会丢。DINO 是点屏起跳，PLANE 是点哪飞哪、自动开火，SNAKE 是左右转。
+
+### 传感器与仪器
+
+| 心率 / 血氧（MAX30102） | DAC 双路波形输出 |
+|---|---|
+| ![](docs/screenshots/09-heart.png) | ![](docs/screenshots/10-dac-wave.png) |
+
+DAC 页面上那两条曲线**不是画着看的**：数据直接取自 DMA 源表，屏幕上看到的就是 PA4/PA5
+引脚正在输出的采样点，频率、波形、循环次数改一下立刻就能在示波器上对上。
+
+| DAC 设置页 | 文件信息面板 |
+|---|---|
+| ![](docs/screenshots/11-dac-settings.png) | ![](docs/screenshots/12-file-info.png) |
+
+设置页可以分别给 PA4 / PA5 选波形（SIN / SQR / TRI / SAW / NOI）、频率（50 Hz ~ 10 kHz 共 8 档）、
+循环次数和扫描方向，两路互不影响。
+
+> 以上均为 320×240 界面实图（`docs/screenshots`），配色与布局和 `menu.c` 里的宏一一对应。
+> 相机预览、相册列表、文件列表三页需要 SD 卡和实机，没有收录静态图。
 
 ## 硬件平台
 
