@@ -31,6 +31,7 @@
 #include "rtc.h"
 #include "24cxx.h"
 #include "key.h"
+#include "beep.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -291,6 +292,29 @@ static void lock_keypad(void)
     }
 }
 
+/* 键盘最后一行结束于 y=228，下面还剩 12 px 空档，正好放一行提示：
+ * 按下 WK_UP 可以重新校准触摸屏。                                    */
+static void lock_hint(void)
+{
+    lfill(0, 228, sw, (int)sh - 228, L_BG2);
+    lcenter(228, 12, (char *)"WK_UP = TOUCH CALIBRATION", L_DIM, L_BG2);
+}
+
+/* 整页重画。TP_Adjust() 会往屏幕上画白底十字，校准完必须从头
+ * 画一遍；把首屏那串调用收在这里，省得两处漏掉某个元素。 */
+static void lock_redraw(u8 n, char *title, char *msg, u16 msg_color, u8 home)
+{
+    lock_bg();
+    l_bar();
+
+    if (home) lock_home_btn();
+
+    lock_title(title);
+    lock_dots(n, 0);
+    lock_msg(msg, msg_color);
+    lock_keypad();
+}
+
 /*=============================================================================
  *  输入
  *===========================================================================*/
@@ -414,12 +438,8 @@ void Lock_Run(void)
 
     lock_load();
 
-    lock_bg();
-    l_bar();
-    lock_title((char *)"ENTER PASSWORD");
-    lock_dots(0, 0);
-    lock_msg((char *)"ENTER 6-DIGIT CODE", L_DIM);
-    lock_keypad();
+    lock_redraw(0, (char *)"ENTER PASSWORD", (char *)"ENTER 6-DIGIT CODE", L_DIM, 0);
+    lock_hint();
 
     last_sec = calendar.sec;
     last_day = calendar.w_date;
@@ -427,6 +447,31 @@ void Lock_Run(void)
 
     for (;;)
     {
+        /* WK_UP：在输密码界面随时重新校准触摸屏。
+         * 触摸屏偏了进不去桌面时，这里是唯一的救命入口。
+         * TP_Adjust() 自己会清屏画十字，校完屏幕是白底，
+         * 所以回来必须整页重画；tp_last 也要清零，否则
+         * 松手那一下会被 lock_touch() 当成一次新按键。      */
+        if (KEY_Scan(0) == WKUP_PRES)
+        {
+            lock_msg((char *)"CALIBRATING TOUCH...", L_AMBER);
+            BEEP_Beep(60);
+            delay_ms(400);              /* 先让人看清提示再切白屏 */
+
+            TP_Adjust();                /* 校完自动写进 EEPROM */
+
+            lock_redraw(n, (char *)"ENTER PASSWORD",
+                        (char *)"TOUCH READY", L_GREEN, 0);
+            lock_hint();
+
+            tp_last  = 0;
+            last_sec = calendar.sec;
+            last_day = calendar.w_date;
+
+            BEEP_Beep(60);
+            continue;
+        }
+
         if (lock_touch())
         {
             k = lock_key((int)tx, (int)ty);
